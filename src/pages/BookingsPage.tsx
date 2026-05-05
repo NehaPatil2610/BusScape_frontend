@@ -1,3 +1,4 @@
+import { useLogto, type IdTokenClaims } from '@logto/react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { fetchBookings } from '../api/searchApi'
@@ -365,6 +366,8 @@ function getBookingCardView(record: BookingRecord): BookingCardView {
 
 export function BookingsPage() {
   const { theme, toggleTheme } = useTheme()
+  const { isAuthenticated, getIdTokenClaims, signIn } = useLogto()
+  const [user, setUser] = useState<IdTokenClaims>()
   const [searchParams, setSearchParams] = useSearchParams()
   const [activeTab, setActiveTab] = useState<BookingTab>('current')
   const [bookings, setBookings] = useState<BookingRecord[]>([])
@@ -378,6 +381,26 @@ export function BookingsPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [retryCounter, setRetryCounter] = useState(0)
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    let isActive = true
+    if (isAuthenticated) {
+      getIdTokenClaims().then((claims) => {
+        if (isActive) setUser(claims)
+      })
+    } else {
+      setUser(undefined)
+    }
+    return () => {
+      isActive = false
+    }
+  }, [isAuthenticated, getIdTokenClaims])
+
+  const userDisplayName =
+    user?.name ?? user?.username ?? user?.email ?? (isAuthenticated ? 'BusScape User' : 'Guest')
+  const userSubtitle = isAuthenticated ? user?.email ?? 'Signed in' : 'Not signed in'
+  const userAvatarUrl = user?.picture
+  const userInitial = (userDisplayName || 'G').trim().charAt(0).toUpperCase()
 
   const page = parsePositiveNumber(searchParams.get('page'), DEFAULT_PAGE)
   const pageSize = parsePositiveNumber(searchParams.get('pageSize'), DEFAULT_PAGE_SIZE)
@@ -516,14 +539,40 @@ export function BookingsPage() {
         <aside className="bookings-sidebar">
           <div className="bookings-profile">
             <div className="bookings-profile-avatar">
-              <img
-                alt="User avatar"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqVhkQUsKSWbqOCom1UBhwOHFhf1NNSXopUbMK_wyb2NObx6UMrsyYNcbC4P-bK-XBKmDiy0xwVusIF9NE57fFzD4ox_K3RsBOeT_31rQmDnJTk7S4SCTNEkzzmnnPy9c-Qs5MZGxzf-T3dVV65990kvb_WxrvpBImi2ZW0Mh_1RglB7wHxOwQ8NdzZZKe_5rx8YXRvpre692lzwdfJEDG68yogU8pwpWhkTE9b8_76SIxiQ94oRSHvK89F2oMyeWraqyfKvBDPCym"
-              />
+              {userAvatarUrl ? (
+                <img alt="User avatar" src={userAvatarUrl} />
+              ) : (
+                <div
+                  aria-label="User avatar"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'var(--color-primary)',
+                    color: '#fff',
+                    fontWeight: 700,
+                    fontSize: '1.25rem',
+                  }}
+                >
+                  {userInitial}
+                </div>
+              )}
             </div>
             <div>
-              <h3>Alex Johnson</h3>
-              <p>Premium Member</p>
+              <h3>{userDisplayName}</h3>
+              <p>{userSubtitle}</p>
+              {!isAuthenticated && (
+                <button
+                  type="button"
+                  className="bookings-icon-btn"
+                  style={{ marginTop: '0.5rem', width: 'auto', padding: '0.25rem 0.75rem' }}
+                  onClick={() => signIn(`${window.location.origin}/callback`)}
+                >
+                  Sign in
+                </button>
+              )}
             </div>
           </div>
 

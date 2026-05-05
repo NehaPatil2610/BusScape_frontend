@@ -1,0 +1,147 @@
+.about-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.about-main {
+  width: min(1100px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 3rem 0 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.about-hero {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, var(--color-primary), #4f46e5);
+  color: #fff;
+}
+
+.about-hero h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 0 0 0.75rem;
+  font-weight: 800;
+}
+
+.about-hero p {
+  margin: 0 auto;
+  max-width: 640px;
+  font-size: 1.05rem;
+  opacity: 0.95;
+  line-height: 1.6;
+}
+
+.about-section h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.about-section p {
+  margin: 0 0 1rem;
+  line-height: 1.7;
+  color: var(--color-text-muted, var(--color-text));
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.about-card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 0.9rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.about-card .material-symbols-outlined {
+  font-size: 1.75rem;
+  color: var(--color-primary);
+}
+
+.about-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.about-card p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.about-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  text-align: center;
+}
+
+.about-stat {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 0.9rem;
+  padding: 1.25rem 1rem;
+}
+
+.about-stat .stat-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.about-stat .stat-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-top: 0.25rem;
+}
+
+.about-faq details {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 0.75rem;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 0.6rem;
+}
+
+.about-faq summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.about-faq details[open] summary {
+  margin-bottom: 0.5rem;
+}
+
+.about-help-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 1rem;
+  padding: 1.5rem;
+}
+
+.about-help-cta a {
+  background: var(--color-primary);
+  color: #fff;
+  padding: 0.65rem 1.25rem;
+  border-radius: 0.6rem;
+  font-weight: 600;
+  text-decoration: none;
+}

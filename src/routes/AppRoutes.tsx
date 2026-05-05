@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router-dom'
+import { AboutPage } from '../pages/AboutPage'
 import { BusDetailsPage } from '../pages/BusDetailsPage'
 import { BookingPage } from '../pages/BookingPage'
 import { BookingsPage } from '../pages/BookingsPage'
@@ -11,6 +12,8 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/help" element={<AboutPage />} />
       <Route path="/callback" element={<CallbackPage />} />
       <Route path="/bookings" element={<BookingsPage />} />
       <Route path="/buses" element={<BusResultsPage />} />

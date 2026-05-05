@@ -44,11 +44,14 @@ export function Header({ theme, onToggleTheme }: HeaderProps) {
           </button>
 
           <nav className={`main-nav ${isMobileMenuOpen ? 'open' : ''}`}>
+            <Link to="/" onClick={closeMobileMenu}>
+              Home
+            </Link>
             <Link to="/bookings" onClick={closeMobileMenu}>
               Bookings
             </Link>
-            <Link to="/" onClick={closeMobileMenu}>
-              Home
+            <Link to="/about" onClick={closeMobileMenu}>
+              About
             </Link>
           </nav>
 

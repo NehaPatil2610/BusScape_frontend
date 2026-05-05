@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 export function Footer() {
   return (
     <footer className="site-footer" id="support">
@@ -17,7 +19,7 @@ export function Footer() {
           <h4 className="footer-title">Company</h4>
           <ul className="footer-links">
             <li>
-              <a href="#about">About Us</a>
+              <Link to="/about">About Us</Link>
             </li>
             <li>
               <a href="#careers">Careers</a>
@@ -32,7 +34,7 @@ export function Footer() {
           <h4 className="footer-title">Support</h4>
           <ul className="footer-links">
             <li>
-              <a href="#help-center">Help Center</a>
+              <Link to="/help">Help Center</Link>
             </li>
             <li>
               <a href="#safety">Safety</a>
