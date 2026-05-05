@@ -2,12 +2,13 @@ import { useLogto } from '@logto/react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useLogtoUser } from '../hooks/useLogtoUser'
-import { fetchBookings } from '../api/searchApi'
+import { fetchBookings, updateBookingStatus } from '../api/searchApi'
 import {
   BookingHistoryCard,
   type BookingPassengerRow,
   type BookingStatusTone,
 } from '../components/bookings/BookingHistoryCard'
+import { ReviewModal } from '../components/bookings/ReviewModal'
 import {
   BookingsEmptyState,
   BookingsErrorState,
@@ -30,6 +31,7 @@ interface NormalizedBookingsResult {
 
 interface BookingCardView {
   id: string
+  serverId: string
   statusLabel: string
   statusTone: BookingStatusTone
   busName: string
@@ -39,6 +41,7 @@ interface BookingCardView {
   amountLabel: string
   passengerRows: BookingPassengerRow[]
   isPast: boolean
+  isCompleted: boolean
 }
 
 function parsePositiveNumber(value: string | null, fallback: number): number {
@@ -351,8 +354,12 @@ function getBookingCardView(record: BookingRecord): BookingCardView {
     record.totalAmount ?? record.total_amount ?? record.amount ?? record.price,
   )
 
+  const serverId = String(record._id ?? record.id ?? record.bookingId ?? '')
+  const isCompleted = (record.status?.toString().toLowerCase() ?? '').includes('complete')
+
   return {
     id: bookingId,
+    serverId,
     statusLabel: toStatusLabel(record.status, isPast),
     statusTone,
     busName: busInfo?.name ?? 'Booked Bus',
@@ -362,7 +369,24 @@ function getBookingCardView(record: BookingRecord): BookingCardView {
     amountLabel: inrCurrencyFormatter.format(amount),
     passengerRows,
     isPast,
+    isCompleted,
   }
+}
+
+const REVIEWED_STORAGE_KEY = 'busscape-reviewed-bookings-v1'
+
+function readReviewedSet(): Set<string> {
+  try {
+    const raw = window.localStorage.getItem(REVIEWED_STORAGE_KEY)
+    if (!raw) return new Set()
+    return new Set(JSON.parse(raw) as string[])
+  } catch {
+    return new Set()
+  }
+}
+
+function writeReviewedSet(set: Set<string>) {
+  window.localStorage.setItem(REVIEWED_STORAGE_KEY, JSON.stringify([...set]))
 }
 
 export function BookingsPage() {
@@ -382,6 +406,8 @@ export function BookingsPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [retryCounter, setRetryCounter] = useState(0)
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({})
+  const [reviewedIds, setReviewedIds] = useState<Set<string>>(() => readReviewedSet())
+  const [reviewTarget, setReviewTarget] = useState<{ serverId: string; busName: string } | null>(null)
 
   const userDisplayName =
     user?.name ??
@@ -474,6 +500,29 @@ export function BookingsPage() {
   }, [page, pageSize, retryCounter])
 
   const bookingCardViews = useMemo(() => bookings.map(getBookingCardView), [bookings])
+
+  useEffect(() => {
+    bookings.forEach((record) => {
+      const serverId = String(record._id ?? record.id ?? record.bookingId ?? '')
+      if (!serverId) return
+      const status = record.status?.toString().toLowerCase() ?? ''
+      if (status.includes('complete') || status.includes('cancel')) return
+      const departure = new Date(
+        record.departureDateTime ??
+          record.departure_datetime ??
+          record.travelDate ??
+          record.travel_date ??
+          record.journeyDate ??
+          record.journey_date ??
+          record.date ??
+          '',
+      )
+      if (Number.isNaN(departure.getTime())) return
+      if (departure.getTime() < Date.now()) {
+        updateBookingStatus(serverId, 'completed').catch(() => undefined)
+      }
+    })
+  }, [bookings])
 
   const currentBookings = useMemo(
     () => bookingCardViews.filter((booking) => !booking.isPast),
@@ -636,28 +685,38 @@ export function BookingsPage() {
 
           {!shouldShowSkeleton && !errorMessage && activeBookings.length > 0 ? (
             <div className="bookings-list">
-              {activeBookings.map((booking) => (
-                <BookingHistoryCard
-                  key={booking.id}
-                  bookingId={booking.id}
-                  statusLabel={booking.statusLabel}
-                  statusTone={booking.statusTone}
-                  busName={booking.busName}
-                  busSubtitle={booking.busSubtitle}
-                  routeLabel={booking.routeLabel}
-                  dateLabel={booking.dateLabel}
-                  amountLabel={booking.amountLabel}
-                  passengerRows={booking.passengerRows}
-                  isPast={booking.isPast}
-                  isExpanded={expandedCards[booking.id] ?? !booking.isPast}
-                  onToggleExpanded={() => {
-                    setExpandedCards((previousCards) => ({
-                      ...previousCards,
-                      [booking.id]: !(previousCards[booking.id] ?? !booking.isPast),
-                    }))
-                  }}
-                />
-              ))}
+              {activeBookings.map((booking) => {
+                const canReview =
+                  (booking.isCompleted || booking.isPast) &&
+                  !!booking.serverId &&
+                  !reviewedIds.has(booking.serverId)
+                return (
+                  <BookingHistoryCard
+                    key={booking.id}
+                    bookingId={booking.id}
+                    statusLabel={booking.statusLabel}
+                    statusTone={booking.statusTone}
+                    busName={booking.busName}
+                    busSubtitle={booking.busSubtitle}
+                    routeLabel={booking.routeLabel}
+                    dateLabel={booking.dateLabel}
+                    amountLabel={booking.amountLabel}
+                    passengerRows={booking.passengerRows}
+                    isPast={booking.isPast}
+                    isExpanded={expandedCards[booking.id] ?? !booking.isPast}
+                    onToggleExpanded={() => {
+                      setExpandedCards((previousCards) => ({
+                        ...previousCards,
+                        [booking.id]: !(previousCards[booking.id] ?? !booking.isPast),
+                      }))
+                    }}
+                    canReview={canReview}
+                    onRate={() =>
+                      setReviewTarget({ serverId: booking.serverId, busName: booking.busName })
+                    }
+                  />
+                )
+              })}
             </div>
           ) : null}
 
@@ -690,6 +749,21 @@ export function BookingsPage() {
       <footer className="bookings-footer">
         <p>© 2026 BusScape Inc. All rights reserved.</p>
       </footer>
+
+      <ReviewModal
+        bookingId={reviewTarget?.serverId ?? ''}
+        busName={reviewTarget?.busName ?? ''}
+        isOpen={reviewTarget !== null}
+        onClose={() => setReviewTarget(null)}
+        onSubmitted={(serverId) => {
+          setReviewedIds((previous) => {
+            const next = new Set(previous)
+            next.add(serverId)
+            writeReviewedSet(next)
+            return next
+          })
+        }}
+      />
     </div>
   )
 }

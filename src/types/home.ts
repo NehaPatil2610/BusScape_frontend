@@ -51,6 +51,8 @@ export interface Bus {
   createdAt: string
   updatedAt: string
   __v: number
+  averageRating?: number
+  reviewCount?: number
 }
 
 export interface PaginationMeta {
@@ -72,8 +74,52 @@ export interface BusSearchQuery {
   seatType?: SeatType
   isAC?: boolean
   departureSlot?: DepartureSlot
+  minRating?: number
   page: number
   pageSize: number
+}
+
+export interface SavedPassenger {
+  _id?: string
+  id?: string
+  name: string
+  age: number
+  gender: PassengerGender
+  idType?: string
+  idNumber?: string
+  isDefault?: boolean
+}
+
+export interface SavedPassengerInput {
+  name: string
+  age: number
+  gender: PassengerGender
+  idType?: string
+  idNumber?: string
+  isDefault?: boolean
+}
+
+export interface BusReview {
+  _id?: string
+  id?: string
+  reviewId?: string
+  bookingId: string
+  busId: string
+  userSub?: string
+  userName?: string
+  rating: number
+  comment?: string
+  photos?: string[]
+  verifiedTrip?: boolean
+  createdAt?: string
+  moderationStatus?: 'pending' | 'approved' | 'rejected'
+}
+
+export interface CreateReviewRequest {
+  bookingId: string
+  rating: number
+  comment?: string
+  photos?: string[]
 }
 
 export interface SeatLockRequest {

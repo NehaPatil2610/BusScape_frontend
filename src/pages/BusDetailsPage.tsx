@@ -8,6 +8,7 @@ import {
   MissingBusIdState,
 } from '../components/bus-details/BusDetailsStates'
 import { BusDetailsHeader } from '../components/bus-details/BusDetailsHeader'
+import { ReviewsSection } from '../components/reviews/ReviewsSection'
 import {
   SeatSelectionMap,
   type DeckType,
@@ -243,6 +244,10 @@ export function BusDetailsPage() {
               date={date}
               onProceedToPayment={handleProceedToPayment}
             />
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <ReviewsSection busId={busId} />
+            </div>
           </>
         ) : null}
       </main>

@@ -21,5 +21,9 @@ export function serializeBusSearchQuery(query: BusSearchQuery): string {
     params.set('departureSlot', query.departureSlot)
   }
 
+  if (query.minRating !== undefined && query.minRating > 0) {
+    params.set('minRating', String(query.minRating))
+  }
+
   return params.toString()
 }

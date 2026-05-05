@@ -4,6 +4,7 @@ export interface BusFiltersState {
   seatType?: SeatType
   isAC?: boolean
   departureSlot?: DepartureSlot
+  minRating?: number
 }
 
 interface BusFiltersSidebarProps {
@@ -11,6 +12,7 @@ interface BusFiltersSidebarProps {
   onSeatTypeChange: (seatType?: SeatType) => void
   onIsAcChange: (isAC?: boolean) => void
   onDepartureSlotChange: (departureSlot?: DepartureSlot) => void
+  onMinRatingChange: (minRating?: number) => void
   onReset: () => void
 }
 
@@ -36,6 +38,7 @@ export function BusFiltersSidebar({
   onSeatTypeChange,
   onIsAcChange,
   onDepartureSlotChange,
+  onMinRatingChange,
   onReset,
 }: BusFiltersSidebarProps) {
   return (
@@ -101,6 +104,22 @@ export function BusFiltersSidebar({
             >
               Non-AC
             </button>
+          </div>
+        </div>
+
+        <div className="filters-section">
+          <h4>Minimum Rating</h4>
+          <div className="filters-pill-group">
+            {[undefined, 3, 4, 5].map((value) => (
+              <button
+                key={String(value)}
+                type="button"
+                className={filters.minRating === value ? 'active' : ''}
+                onClick={() => onMinRatingChange(value)}
+              >
+                {value === undefined ? 'Any' : `${value}★ & up`}
+              </button>
+            ))}
           </div>
         </div>
 

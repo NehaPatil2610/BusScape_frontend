@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { createBooking, fetchBusDetails } from '../api/searchApi'
+import {
+  createBooking,
+  createSavedPassenger,
+  fetchBusDetails,
+  listSavedPassengers,
+} from '../api/searchApi'
+import { useLogtoUser } from '../hooks/useLogtoUser'
+import type { SavedPassenger } from '../types/home'
 import { BookingSummaryPanel } from '../components/booking/BookingSummaryPanel'
 import {
   BookingPageErrorState,
@@ -73,6 +80,9 @@ export function BookingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
   const [redirectInSeconds, setRedirectInSeconds] = useState(3)
+  const [savedPassengers, setSavedPassengers] = useState<SavedPassenger[]>([])
+  const [savePromptOpen, setSavePromptOpen] = useState(false)
+  const { isAuthenticated } = useLogtoUser()
 
   const hasBookingContext = busId.length > 0 && seatNumbers.length > 0
   const baseFare = bus ? seatNumbers.length * bus.price : 0
@@ -97,6 +107,34 @@ export function BookingPage() {
       window.clearTimeout(timeout)
     }
   }, [isSuccessModalOpen, navigate, redirectInSeconds])
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setSavedPassengers([])
+      return
+    }
+    listSavedPassengers()
+      .then((response) => {
+        const data = response.data
+        if (Array.isArray(data)) setSavedPassengers(data)
+        else if (data && typeof data === 'object' && 'data' in data) {
+          const inner = (data as { data: SavedPassenger[] }).data
+          setSavedPassengers(Array.isArray(inner) ? inner : [])
+        }
+      })
+      .catch(() => undefined)
+  }, [isAuthenticated])
+
+  const fillFromSaved = (seatNumber: number, passenger: SavedPassenger) => {
+    setPassengerBySeatNumber((previous) => ({
+      ...previous,
+      [seatNumber]: {
+        name: passenger.name,
+        age: String(passenger.age),
+        gender: passenger.gender,
+      },
+    }))
+  }
 
   useEffect(() => {
     if (!busId || !hasBookingContext) {
@@ -266,6 +304,9 @@ export function BookingPage() {
       .then(() => {
         setRedirectInSeconds(3)
         setIsSuccessModalOpen(true)
+        if (isAuthenticated) {
+          setSavePromptOpen(true)
+        }
       })
       .catch((error: unknown) => {
         setSubmitErrorMessage(
@@ -340,19 +381,55 @@ export function BookingPage() {
                 </div>
 
                 {seatNumbers.map((seatNumber, index) => (
-                  <PassengerDetailsCard
-                    key={`passenger-${seatNumber}`}
-                    index={index}
-                    seatNumber={seatNumber}
-                    value={
-                      passengerBySeatNumber[seatNumber] ?? {
-                        name: '',
-                        age: '',
-                        gender: '',
+                  <div key={`passenger-${seatNumber}`}>
+                    {savedPassengers.length > 0 && (
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: '0.4rem',
+                          marginBottom: '0.5rem',
+                        }}
+                      >
+                        <span style={{ fontSize: '0.85rem', opacity: 0.7, alignSelf: 'center' }}>
+                          Use saved:
+                        </span>
+                        {savedPassengers.map((passenger) => {
+                          const id = passenger._id ?? passenger.id ?? passenger.name
+                          return (
+                            <button
+                              key={id}
+                              type="button"
+                              onClick={() => fillFromSaved(seatNumber, passenger)}
+                              style={{
+                                padding: '0.3rem 0.7rem',
+                                borderRadius: '999px',
+                                border: '1px solid var(--color-border)',
+                                background: 'var(--color-surface)',
+                                color: 'var(--color-text)',
+                                fontSize: '0.85rem',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              {passenger.name} ({passenger.age})
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )}
+                    <PassengerDetailsCard
+                      index={index}
+                      seatNumber={seatNumber}
+                      value={
+                        passengerBySeatNumber[seatNumber] ?? {
+                          name: '',
+                          age: '',
+                          gender: '',
+                        }
                       }
-                    }
-                    onChange={handlePassengerChange}
-                  />
+                      onChange={handlePassengerChange}
+                    />
+                  </div>
                 ))}
 
                 <section className="booking-contact-card">
@@ -414,6 +491,88 @@ export function BookingPage() {
       <footer className="booking-footer">
         <p>BusScape © 2026. All rights reserved.</p>
       </footer>
+
+      {savePromptOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.55)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 110,
+            padding: '1rem',
+          }}
+        >
+          <div
+            style={{
+              background: 'var(--color-surface)',
+              color: 'var(--color-text)',
+              padding: '1.5rem',
+              borderRadius: '1rem',
+              width: 'min(440px, 100%)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
+            }}
+          >
+            <h2 style={{ margin: 0 }}>Save these travellers?</h2>
+            <p style={{ margin: 0, opacity: 0.8 }}>
+              Add these passengers to your address book for faster booking next time.
+            </p>
+            <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => setSavePromptOpen(false)}
+                style={{
+                  padding: '0.55rem 1rem',
+                  borderRadius: '0.5rem',
+                  border: '1px solid var(--color-border)',
+                  background: 'transparent',
+                  color: 'var(--color-text)',
+                  cursor: 'pointer',
+                }}
+              >
+                Not now
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  const passengers = createPassengersPayload()
+                  if (!passengers) {
+                    setSavePromptOpen(false)
+                    return
+                  }
+                  await Promise.all(
+                    passengers.map((passenger) =>
+                      createSavedPassenger({
+                        name: passenger.name,
+                        age: passenger.age,
+                        gender: passenger.gender,
+                      }).catch(() => undefined),
+                    ),
+                  )
+                  setSavePromptOpen(false)
+                }}
+                style={{
+                  padding: '0.55rem 1rem',
+                  borderRadius: '0.5rem',
+                  border: 'none',
+                  background: 'var(--color-primary)',
+                  color: '#fff',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Save all
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <BookingSuccessModal
         isOpen={isSuccessModalOpen}

@@ -8,12 +8,14 @@ import { CallbackPage } from '../pages/CallbackPage'
 import { HomePage } from '../pages/HomePage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { ProfilePage } from '../pages/ProfilePage'
+import { SavedPassengersPage } from '../pages/SavedPassengersPage'
 
 export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/profile" element={<ProfilePage />} />
+      <Route path="/saved-passengers" element={<SavedPassengersPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/help" element={<AboutPage />} />
       <Route path="/callback" element={<CallbackPage />} />

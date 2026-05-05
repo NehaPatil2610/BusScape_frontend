@@ -8,6 +8,16 @@ interface RequestOptions {
   signal?: AbortSignal
 }
 
+let currentUserSub: string | null = null
+
+export function setCurrentUserSub(sub: string | null) {
+  currentUserSub = sub
+}
+
+export function getCurrentUserSub(): string | null {
+  return currentUserSub
+}
+
 function normalizePath(path: string): string {
   return path.startsWith('/') ? path : `/${path}`
 }
@@ -17,14 +27,15 @@ export async function httpRequest<T>(
   options: RequestOptions = {},
 ): Promise<ApiResponse<T>> {
   const { method = 'GET', body, headers, signal } = options
-  const defaultHeaders: HeadersInit =
-    body === undefined ? {} : { 'Content-Type': 'application/json' }
+  const defaultHeaders: Record<string, string> = {}
+  if (body !== undefined) defaultHeaders['Content-Type'] = 'application/json'
+  if (currentUserSub) defaultHeaders['x-user-sub'] = currentUserSub
 
   const response = await fetch(`${BACKEND_BASE_URL}${normalizePath(path)}`, {
     method,
     headers: {
       ...defaultHeaders,
-      ...headers,
+      ...(headers as Record<string, string> | undefined),
     },
     body: body === undefined ? undefined : JSON.stringify(body),
     signal,

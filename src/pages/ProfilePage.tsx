@@ -1,5 +1,6 @@
 import { useLogto } from '@logto/react'
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   updateAccount,
   updateAccountProfile,
@@ -158,6 +159,18 @@ export function ProfilePage() {
             <h1>{form.name || form.username || 'BusScape User'}</h1>
             <p>{user?.email ?? 'No email on file'}</p>
             <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>ID: {user?.sub ?? '—'}</p>
+            <Link
+              to="/saved-passengers"
+              style={{
+                display: 'inline-block',
+                marginTop: '0.5rem',
+                fontSize: '0.9rem',
+                color: 'var(--color-primary)',
+                fontWeight: 600,
+              }}
+            >
+              Manage saved travellers →
+            </Link>
           </div>
         </div>
 

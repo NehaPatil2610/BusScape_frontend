@@ -118,6 +118,10 @@ function parseBusSearchQuery(searchParams: URLSearchParams): BusSearchQuery {
     seatType: parseSeatType(searchParams.get('seatType')),
     isAC: parseBooleanParam(searchParams.get('isAC')),
     departureSlot: parseDepartureSlot(searchParams.get('departureSlot')),
+    minRating: (() => {
+      const v = Number(searchParams.get('minRating'))
+      return Number.isFinite(v) && v > 0 ? v : undefined
+    })(),
     page: parsePositiveNumber(searchParams.get('page'), DEFAULT_PAGE),
     pageSize: parsePositiveNumber(searchParams.get('pageSize'), DEFAULT_PAGE_SIZE),
   }
@@ -199,8 +203,9 @@ export function BusResultsPage() {
       seatType: searchQuery.seatType,
       isAC: searchQuery.isAC,
       departureSlot: searchQuery.departureSlot,
+      minRating: searchQuery.minRating,
     }),
-    [searchQuery.departureSlot, searchQuery.isAC, searchQuery.seatType],
+    [searchQuery.departureSlot, searchQuery.isAC, searchQuery.seatType, searchQuery.minRating],
   )
 
   const updateQueryParams = useCallback(
@@ -322,6 +327,7 @@ export function BusResultsPage() {
       seatType: undefined,
       isAC: undefined,
       departureSlot: undefined,
+      minRating: undefined,
     })
   }
 
@@ -372,6 +378,11 @@ export function BusResultsPage() {
             }}
             onDepartureSlotChange={(departureSlot) => {
               updateQueryParams({ departureSlot })
+            }}
+            onMinRatingChange={(minRating) => {
+              updateQueryParams({
+                minRating: minRating === undefined ? undefined : String(minRating),
+              })
             }}
             onReset={handleResetFilters}
           />

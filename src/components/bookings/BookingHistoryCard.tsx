@@ -23,6 +23,8 @@ interface BookingHistoryCardProps {
   isPast: boolean
   isExpanded: boolean
   onToggleExpanded: () => void
+  canReview?: boolean
+  onRate?: () => void
 }
 
 export function BookingHistoryCard({
@@ -38,6 +40,8 @@ export function BookingHistoryCard({
   isPast,
   isExpanded,
   onToggleExpanded,
+  canReview,
+  onRate,
 }: BookingHistoryCardProps) {
   return (
     <article className={`booking-history-card ${isPast ? 'past' : ''}`}>
@@ -69,6 +73,25 @@ export function BookingHistoryCard({
 
         <div className="booking-history-actions">
           <strong>{amountLabel}</strong>
+          {canReview && onRate && (
+            <button
+              type="button"
+              onClick={onRate}
+              style={{
+                marginTop: '0.5rem',
+                padding: '0.4rem 0.8rem',
+                borderRadius: '0.5rem',
+                border: 'none',
+                background: 'var(--color-primary)',
+                color: '#fff',
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+              }}
+            >
+              ★ Rate this trip
+            </button>
+          )}
         </div>
       </div>
 

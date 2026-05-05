@@ -38,6 +38,16 @@ export function BusResultCard({ bus, detailsUrl }: BusResultCardProps) {
           <p className="result-card-subtitle">
             {seatTypeLabel || 'N/A'} • {stopInfo}
           </p>
+          <p className="result-card-rating" style={{ margin: '0.15rem 0 0', fontSize: '0.85rem' }}>
+            {bus.reviewCount && bus.reviewCount > 0 && bus.averageRating !== undefined ? (
+              <>
+                <span style={{ color: '#f59e0b' }}>★ {bus.averageRating.toFixed(1)}</span>
+                <span style={{ opacity: 0.7 }}> ({bus.reviewCount} review{bus.reviewCount === 1 ? '' : 's'})</span>
+              </>
+            ) : (
+              <span style={{ opacity: 0.6 }}>No reviews yet</span>
+            )}
+          </p>
 
           <div className="result-timing-row">
             <div className="time-node">
