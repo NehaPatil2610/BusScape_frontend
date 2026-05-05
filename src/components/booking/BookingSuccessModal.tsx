@@ -4,6 +4,7 @@ interface BookingSuccessModalProps {
   totalAmountLabel: string
   redirectInSeconds: number
   onGoHome: () => void
+  onDownloadTicket?: () => void
 }
 
 export function BookingSuccessModal({
@@ -12,6 +13,7 @@ export function BookingSuccessModal({
   totalAmountLabel,
   redirectInSeconds,
   onGoHome,
+  onDownloadTicket,
 }: BookingSuccessModalProps) {
   if (!isOpen) {
     return null
@@ -38,10 +40,33 @@ export function BookingSuccessModal({
           </div>
         </div>
 
-        <button type="button" onClick={onGoHome}>
-          Go to Home
-          <span className="material-symbols-outlined">arrow_forward</span>
-        </button>
+        <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          {onDownloadTicket && (
+            <button
+              type="button"
+              onClick={onDownloadTicket}
+              style={{
+                padding: '0.55rem 1rem',
+                borderRadius: '0.5rem',
+                border: '1px solid var(--color-border)',
+                background: 'transparent',
+                color: 'var(--color-text)',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+              }}
+            >
+              <span className="material-symbols-outlined">download</span>
+              Download Ticket
+            </button>
+          )}
+          <button type="button" onClick={onGoHome}>
+            Go to Home
+            <span className="material-symbols-outlined">arrow_forward</span>
+          </button>
+        </div>
 
         <small>Redirecting to home in {redirectInSeconds}s...</small>
       </div>

@@ -25,6 +25,7 @@ interface BookingHistoryCardProps {
   onToggleExpanded: () => void
   canReview?: boolean
   onRate?: () => void
+  onDownloadTicket?: () => void
 }
 
 export function BookingHistoryCard({
@@ -42,6 +43,7 @@ export function BookingHistoryCard({
   onToggleExpanded,
   canReview,
   onRate,
+  onDownloadTicket,
 }: BookingHistoryCardProps) {
   return (
     <article className={`booking-history-card ${isPast ? 'past' : ''}`}>
@@ -73,6 +75,31 @@ export function BookingHistoryCard({
 
         <div className="booking-history-actions">
           <strong>{amountLabel}</strong>
+          {onDownloadTicket && (
+            <button
+              type="button"
+              onClick={onDownloadTicket}
+              style={{
+                marginTop: '0.5rem',
+                padding: '0.4rem 0.8rem',
+                borderRadius: '0.5rem',
+                border: '1px solid var(--color-border)',
+                background: 'var(--color-surface)',
+                color: 'var(--color-text)',
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
+                download
+              </span>
+              Ticket
+            </button>
+          )}
           {canReview && onRate && (
             <button
               type="button"

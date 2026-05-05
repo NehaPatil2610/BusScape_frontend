@@ -134,3 +134,24 @@ export function createReview(payload: CreateReviewRequest, signal?: AbortSignal)
     signal,
   })
 }
+
+export async function downloadBookingTicket(bookingId: string) {
+  const { BACKEND_BASE_URL } = await import('../utils/env')
+  const { getCurrentUserSub } = await import('./httpClient')
+  const sub = getCurrentUserSub()
+  const response = await fetch(`${BACKEND_BASE_URL}/api/bookings/${bookingId}/ticket`, {
+    headers: sub ? { 'x-user-sub': sub } : {},
+  })
+  if (!response.ok) {
+    throw new Error(`Failed to download ticket (${response.status})`)
+  }
+  const blob = await response.blob()
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `busscape-ticket-${bookingId}.pdf`
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
+}

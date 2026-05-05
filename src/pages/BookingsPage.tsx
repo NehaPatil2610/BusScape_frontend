@@ -2,7 +2,7 @@ import { useLogto } from '@logto/react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useLogtoUser } from '../hooks/useLogtoUser'
-import { fetchBookings, updateBookingStatus } from '../api/searchApi'
+import { downloadBookingTicket, fetchBookings, updateBookingStatus } from '../api/searchApi'
 import {
   BookingHistoryCard,
   type BookingPassengerRow,
@@ -713,6 +713,17 @@ export function BookingsPage() {
                     canReview={canReview}
                     onRate={() =>
                       setReviewTarget({ serverId: booking.serverId, busName: booking.busName })
+                    }
+                    onDownloadTicket={
+                      booking.serverId
+                        ? () => {
+                            downloadBookingTicket(booking.serverId).catch((err: unknown) => {
+                              window.alert(
+                                err instanceof Error ? err.message : 'Failed to download ticket',
+                              )
+                            })
+                          }
+                        : undefined
                     }
                   />
                 )

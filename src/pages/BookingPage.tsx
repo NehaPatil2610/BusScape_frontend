@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   createBooking,
   createSavedPassenger,
+  downloadBookingTicket,
   fetchBusDetails,
   listSavedPassengers,
 } from '../api/searchApi'
@@ -82,6 +83,7 @@ export function BookingPage() {
   const [redirectInSeconds, setRedirectInSeconds] = useState(3)
   const [savedPassengers, setSavedPassengers] = useState<SavedPassenger[]>([])
   const [savePromptOpen, setSavePromptOpen] = useState(false)
+  const [createdBookingId, setCreatedBookingId] = useState<string | null>(null)
   const { isAuthenticated } = useLogtoUser()
 
   const hasBookingContext = busId.length > 0 && seatNumbers.length > 0
@@ -301,7 +303,16 @@ export function BookingPage() {
       departure: departureValue,
       arrival: arrivalValue,
     })
-      .then(() => {
+      .then((response) => {
+        const data = response.data as Record<string, unknown> | undefined
+        const newId =
+          (data?._id as string | undefined) ??
+          (data?.id as string | undefined) ??
+          (data?.bookingId as string | undefined) ??
+          ((data?.data as Record<string, unknown> | undefined)?._id as string | undefined) ??
+          ((data?.data as Record<string, unknown> | undefined)?.id as string | undefined) ??
+          null
+        setCreatedBookingId(newId)
         setRedirectInSeconds(3)
         setIsSuccessModalOpen(true)
         if (isAuthenticated) {
@@ -582,6 +593,17 @@ export function BookingPage() {
         onGoHome={() => {
           navigate('/')
         }}
+        onDownloadTicket={
+          createdBookingId
+            ? () => {
+                downloadBookingTicket(createdBookingId).catch((err: unknown) => {
+                  window.alert(
+                    err instanceof Error ? err.message : 'Failed to download ticket',
+                  )
+                })
+              }
+            : undefined
+        }
       />
     </div>
   )
