@@ -1,6 +1,10 @@
+import { useLogto } from '@logto/react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { ThemeMode } from '../../types/app'
+
+const SIGN_IN_REDIRECT = `${window.location.origin}/callback`
+const POST_SIGN_OUT_REDIRECT = `${window.location.origin}/`
 
 interface HeaderProps {
   theme: ThemeMode
@@ -9,6 +13,7 @@ interface HeaderProps {
 
 export function Header({ theme, onToggleTheme }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { signIn, signOut, isAuthenticated } = useLogto()
 
   const themeIcon = theme === 'dark' ? 'light_mode' : 'dark_mode'
 
@@ -63,7 +68,25 @@ export function Header({ theme, onToggleTheme }: HeaderProps) {
             >
               <span className="material-symbols-outlined">account_circle</span>
             </Link>
-
+            {isAuthenticated ? (
+              <button
+                type="button"
+                className="icon-button"
+                aria-label="Sign out"
+                onClick={() => signOut(POST_SIGN_OUT_REDIRECT)}
+              >
+                <span className="material-symbols-outlined">logout</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="icon-button"
+                aria-label="Sign in"
+                onClick={() => signIn(SIGN_IN_REDIRECT)}
+              >
+                <span className="material-symbols-outlined">login</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
