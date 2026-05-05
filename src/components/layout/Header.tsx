@@ -1,6 +1,7 @@
 import { useLogto } from '@logto/react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useLogtoUser } from '../../hooks/useLogtoUser'
 import type { ThemeMode } from '../../types/app'
 
 const SIGN_IN_REDIRECT = `${window.location.origin}/callback`
@@ -13,7 +14,9 @@ interface HeaderProps {
 
 export function Header({ theme, onToggleTheme }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const { signIn, signOut, isAuthenticated } = useLogto()
+  const { signIn, signOut } = useLogto()
+  const { isAuthenticated, user } = useLogtoUser()
+  const userLabel = user?.name ?? user?.username ?? user?.email ?? ''
 
   const themeIcon = theme === 'dark' ? 'light_mode' : 'dark_mode'
 
@@ -72,14 +75,24 @@ export function Header({ theme, onToggleTheme }: HeaderProps) {
               <span className="material-symbols-outlined">account_circle</span>
             </Link>
             {isAuthenticated ? (
-              <button
-                type="button"
-                className="icon-button"
-                aria-label="Sign out"
-                onClick={() => signOut(POST_SIGN_OUT_REDIRECT)}
-              >
-                <span className="material-symbols-outlined">logout</span>
-              </button>
+              <>
+                {userLabel && (
+                  <span
+                    className="header-user-label"
+                    style={{ fontWeight: 600, fontSize: '0.9rem' }}
+                  >
+                    {userLabel}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  className="icon-button"
+                  aria-label="Sign out"
+                  onClick={() => signOut(POST_SIGN_OUT_REDIRECT)}
+                >
+                  <span className="material-symbols-outlined">logout</span>
+                </button>
+              </>
             ) : (
               <button
                 type="button"

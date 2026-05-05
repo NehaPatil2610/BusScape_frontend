@@ -1,4 +1,4 @@
-import { LogtoProvider, type LogtoConfig } from '@logto/react'
+import { LogtoProvider, UserScope, type LogtoConfig } from '@logto/react'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
@@ -9,6 +9,13 @@ import './index.css'
 const logtoConfig: LogtoConfig = {
   endpoint: 'https://df4in1.logto.app/',
   appId: 'prjzjqxbbnjokkfvs3d4r',
+  scopes: [
+    UserScope.Profile,
+    UserScope.Email,
+    UserScope.Phone,
+    UserScope.CustomData,
+    UserScope.Identities,
+  ],
 }
 
 createRoot(document.getElementById('root')!).render(

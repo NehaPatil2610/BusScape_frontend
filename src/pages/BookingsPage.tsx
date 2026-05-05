@@ -1,6 +1,7 @@
-import { useLogto, type IdTokenClaims } from '@logto/react'
+import { useLogto } from '@logto/react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { useLogtoUser } from '../hooks/useLogtoUser'
 import { fetchBookings } from '../api/searchApi'
 import {
   BookingHistoryCard,
@@ -366,8 +367,8 @@ function getBookingCardView(record: BookingRecord): BookingCardView {
 
 export function BookingsPage() {
   const { theme, toggleTheme } = useTheme()
-  const { isAuthenticated, getIdTokenClaims, signIn } = useLogto()
-  const [user, setUser] = useState<IdTokenClaims>()
+  const { signIn } = useLogto()
+  const { isAuthenticated, isLoading: isUserLoading, user } = useLogtoUser()
   const [searchParams, setSearchParams] = useSearchParams()
   const [activeTab, setActiveTab] = useState<BookingTab>('current')
   const [bookings, setBookings] = useState<BookingRecord[]>([])
@@ -382,23 +383,14 @@ export function BookingsPage() {
   const [retryCounter, setRetryCounter] = useState(0)
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({})
 
-  useEffect(() => {
-    let isActive = true
-    if (isAuthenticated) {
-      getIdTokenClaims().then((claims) => {
-        if (isActive) setUser(claims)
-      })
-    } else {
-      setUser(undefined)
-    }
-    return () => {
-      isActive = false
-    }
-  }, [isAuthenticated, getIdTokenClaims])
-
   const userDisplayName =
-    user?.name ?? user?.username ?? user?.email ?? (isAuthenticated ? 'BusScape User' : 'Guest')
-  const userSubtitle = isAuthenticated ? user?.email ?? 'Signed in' : 'Not signed in'
+    user?.name ??
+    user?.username ??
+    user?.email ??
+    (isAuthenticated ? (isUserLoading ? 'Loading…' : 'BusScape User') : 'Guest')
+  const userSubtitle = isAuthenticated
+    ? user?.email ?? user?.phoneNumber ?? 'Signed in'
+    : 'Not signed in'
   const userAvatarUrl = user?.picture
   const userInitial = (userDisplayName || 'G').trim().charAt(0).toUpperCase()
 
@@ -563,6 +555,12 @@ export function BookingsPage() {
             <div>
               <h3>{userDisplayName}</h3>
               <p>{userSubtitle}</p>
+              {isAuthenticated && user?.phoneNumber && (
+                <p style={{ fontSize: '0.8rem', opacity: 0.75, margin: '0.15rem 0 0' }}>
+                  📞 {user.phoneNumber}
+                  {user.phoneNumberVerified ? ' ✓' : ''}
+                </p>
+              )}
               {!isAuthenticated && (
                 <button
                   type="button"
