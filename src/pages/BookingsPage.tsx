@@ -520,7 +520,7 @@ export function BookingsPage() {
             <button type="button" className="bookings-icon-btn" aria-label="Notifications">
               <span className="material-symbols-outlined">notifications</span>
             </button>
-            <Link to="/bookings" className="bookings-icon-btn" aria-label="Account">
+            <Link to="/profile" className="bookings-icon-btn" aria-label="Account">
               <span className="material-symbols-outlined">account_circle</span>
             </Link>
           </div>

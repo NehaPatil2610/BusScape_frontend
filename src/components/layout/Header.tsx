@@ -68,8 +68,8 @@ export function Header({ theme, onToggleTheme }: HeaderProps) {
               <span className="material-symbols-outlined">{themeIcon}</span>
             </button>
             <Link
-              to="/bookings"
-              aria-label="Open profile actions"
+              to="/profile"
+              aria-label="Open profile"
               className="icon-button"
             >
               <span className="material-symbols-outlined">account_circle</span>
