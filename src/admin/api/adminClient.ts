@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { BACKEND_BASE_URL } from '../../utils/env';
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000') + '/api/admin';
+const BASE_URL = BACKEND_BASE_URL + '/api/admin';
 
 const adminClient = axios.create({ baseURL: BASE_URL });
 
