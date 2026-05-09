@@ -9,10 +9,12 @@ import { HomePage } from '../pages/HomePage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { ProfilePage } from '../pages/ProfilePage'
 import { SavedPassengersPage } from '../pages/SavedPassengersPage'
+import { AdminRoutes } from '../admin/AdminRoutes'
 
 export function AppRoutes() {
   return (
     <Routes>
+      {/* Main app routes */}
       <Route path="/" element={<HomePage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/saved-passengers" element={<SavedPassengersPage />} />
@@ -23,6 +25,10 @@ export function AppRoutes() {
       <Route path="/buses" element={<BusResultsPage />} />
       <Route path="/buses/:busId" element={<BusDetailsPage />} />
       <Route path="/buses/:busId/booking" element={<BookingPage />} />
+
+      {/* Admin panel — completely separate from main app */}
+      <Route path="/admin/*" element={<AdminRoutes />} />
+
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
